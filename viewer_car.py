@@ -6,12 +6,12 @@ from itertools import cycle   # cyclic iterator to easily toggle polygon renderi
 from patch.textured.TexturedPatch import *
 from model.model import CarModel
 from libs.transform import Trackball
-from libs.camera import PovCamera
+from libs.camera import *
 
 # ------------  Viewer class & windows management ------------------------------
 class Viewer:
     """ GLFW viewer windows, with classic initialization & graphics loop """
-    def __init__(self, width=1000, height=1000):
+    def __init__(self, width=960, height=1080):
         self.fill_modes = cycle([GL.GL_LINE, GL.GL_POINT, GL.GL_FILL])
 
         # version hints: create GL windows with >= OpenGL 3.3 and core profile
@@ -52,6 +52,7 @@ class Viewer:
 
         # cameras
         self.povCamera = PovCamera()
+        self.cameraArray = CameraArray()
 
     def run(self):
         """ Main render loop for this OpenGL windows """
@@ -61,13 +62,25 @@ class Viewer:
 
             win_size = glfw.get_window_size(self.win)
 
-            projection = self.povCamera.get_projection_matrix(winsize=win_size)
+            projection_matrix = self.povCamera.get_projection_matrix(winsize=win_size)
             view_matrix = self.povCamera.get_view_matrix()
             
-            # draw objects in slave window
+            GL.glViewport(0, 360, 960, 720)
+            # draw objects in master window
             for drawable in self.drawables:
-                drawable.draw(projection=projection, view=view_matrix)
+                drawable.draw(projection=projection_matrix, view=view_matrix)
+            
+            # draw camera markers
+            markers = self.cameraArray.get_all_drawables()
+            for marker in markers:
+                marker.draw(projection=projection_matrix, view=view_matrix)
 
+            GL.glViewport(0, 0, 480, 360)
+            projection_matrix = self.cameraArray.get_current_projection((480, 360))
+            view_matrix = self.cameraArray.get_current_view()
+            for drawable in self.drawables:
+                drawable.draw(projection=projection_matrix, view=view_matrix)
+            
             # flush render commands, and swap draw buffers
             glfw.swap_buffers(self.win)
 
@@ -88,7 +101,10 @@ class Viewer:
                 GL.glPolygonMode(GL.GL_FRONT_AND_BACK, next(self.fill_modes))
 
             if key in [glfw.KEY_W, glfw.KEY_A, glfw.KEY_S, glfw.KEY_D, glfw.KEY_LEFT_SHIFT, glfw.KEY_SPACE]:
-                    self.povCamera.process_keyboard(key)
+                self.povCamera.process_keyboard(key)
+
+            if key in [glfw.KEY_LEFT, glfw.KEY_RIGHT]:
+                self.cameraArray.process_keyboard(key)    
 
             for drawable in self.drawables:
                 if hasattr(drawable, 'key_handler'):

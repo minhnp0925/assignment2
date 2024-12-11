@@ -35,13 +35,11 @@ class Camera(Trackball):
 class StaticCamera:
     def __init__(self, xpos, ypos, zpos):
         self.camera_pos = Vector3([xpos, ypos, zpos])
-        self.camera_front = Vector3([0.0, 1.0, 0.0])
-        self.camera_up = Vector3([0.0, 0.0, 1.0])
-        self.camera_right = Vector3([1.0, 0.0, 0.0])
+        self.camera_up = Vector3([0.0, 1.0, 0.0])
 
     def get_view_matrix(self):
-        # return np.transpose(matrix44.create_look_at(self.camera_pos, Vector3([0.0, 0.0, 0.0]), Vector3([0.0, -1.0, 0.0])))
         return np.transpose(matrix44.create_look_at(self.camera_pos, Vector3([0.0, 0.0, 0.0]), self.camera_up))
+    
     def get_projection_matrix(self, winsize = (640,640)):
         distance = vector.length(self.camera_pos)
         return perspective(70, winsize[0]/winsize[1], distance*0.01, distance*100)
@@ -52,7 +50,7 @@ class StaticCamera:
         return drawable
 
 class CameraArray:
-    def __init__(self, radius=10, num_latitude=20, num_longitude=20):
+    def __init__(self, radius=10, num_latitude=3, num_longitude=3):
         self.cameras = []
         self.active_index = 0
 
@@ -65,21 +63,24 @@ class CameraArray:
 
     def generate_camera_positions(self):
         """Generate cameras in a north hemisphere pattern."""
-        for i in range(self.num_latitude):
-            theta = (i / self.num_latitude) * (np.pi)  # Full latitude range, 0 to pi
-            for j in range(self.num_longitude):
-                phi = (j / self.num_longitude) * (np.pi)  # East hemisphere: 0 to pi
+        for i in range(1, self.num_latitude+1):
+            # Latitude range limited to 0 (equator) to π/2 (north pole)
+            theta = (i / (self.num_latitude+1) ) * (np.pi / 2)
+            for j in range(0, self.num_longitude):
+                # Full longitude range: 0 to 2π
+                phi = (j / self.num_longitude) * (2 * np.pi)
 
                 # Calculate camera positions based on spherical coordinates
                 x = self.radius * np.sin(theta) * np.cos(phi)
                 y = self.radius * np.cos(theta)
                 z = self.radius * np.sin(theta) * np.sin(phi)
 
-                # Add the
-                #  camera at calculated position
-                self.add(x, y, z)
+                # Add the camera at the calculated position
+                self.add_camera(x, y, z)
 
-    def add(self, xpos, ypos, zpos):
+
+    def add_camera(self, xpos, ypos, zpos):
+        print("Add cam: ", xpos, ypos, zpos)
         self.cameras += [StaticCamera(xpos=xpos, ypos=ypos, zpos=zpos)]
     
     def get_current_view(self):
@@ -99,7 +100,6 @@ class CameraArray:
     def set_active(self, idx):
         self.active_index = idx
 
-
     def process_keyboard(self, key):
         next_idx = (self.active_index + 1) % len(self.cameras)
         prev_idx = (self.active_index + len(self.cameras) - 1) % len(self.cameras)
@@ -108,23 +108,18 @@ class CameraArray:
         if key == glfw.KEY_LEFT:
             self.set_active(prev_idx)
         
-    def get_drawable(self, ball_position = np.array([0,0,0])):
-        camera_sorted_index = np.argsort([np.linalg.norm(np.array(self.cameras[i].camera_pos) - ball_position) for i in range(len(self.cameras))])
-        self.active_index   = camera_sorted_index[0]
+    def get_drawable(self):
         return self.cameras[self.active_index].get_drawable(True) if self.active_index > -1 else None
     
-    def get_all_drawables(self, ball_position = np.array([0,0,0])):
-        # drawables = []
-        camera_sorted_index = np.argsort([np.linalg.norm(np.array(self.cameras[i].camera_pos) - ball_position) for i in range(len(self.cameras))])
-        self.active_index   = camera_sorted_index[0]
-        # for i in range(0, len(self.cameras)):
-            
-        #     if i == self.active_index:
-        #         drawables += [self.cameras[i].get_drawable(True)]
-        #     else:
-        #         drawables += [self.cameras[i].get_drawable(False)]
+    def get_all_drawables(self):
+        drawables = []
+        for i in range(0, len(self.cameras)):
+            if i == self.active_index:
+                drawables += [self.cameras[i].get_drawable(True)]
+            else:
+                drawables += [self.cameras[i].get_drawable(False)]
 
-        return [self.cameras[self.active_index].get_drawable(True)]
+        return drawables
 
 class Marker:
     def __init__(self, vert_shader, frag_shader, xpos, ypos, zpos, scale=0.1, is_active=False):
@@ -141,19 +136,19 @@ class Marker:
         ], dtype=np.float32)
         if is_active:
             self.colors = np.array([
-                [1.0, 0.0, 0.0],  # Red
+                [0.0, 1.0, 0.0],  # Red
                 [0.5, 0.5, 0.5],  # Gray
-                [0.5, 0.5, 0.5],  # Gray
-                [0.5, 0.5, 0.5],  # Gray
-                [0.5, 0.5, 0.5],  # Gray
+                [0.4, 0.5, 0.6],  # Gray
+                [0.6, 0.5, 0.4],  # Gray
+                [0.4, 0.6, 0.5],  # Gray
             ], dtype=np.float32) 
         else: 
             self.colors = np.array([
+                [1.0, 0.0, 0.0],  # Red
                 [0.5, 0.5, 0.5],  # Gray
-                [0.5, 0.5, 0.5],  # Gray
-                [0.5, 0.5, 0.5],  # Gray
-                [0.5, 0.5, 0.5],  # Gray
-                [0.5, 0.5, 0.5],  # Gray
+                [0.4, 0.5, 0.6],  # Gray
+                [0.6, 0.5, 0.4],  # Gray
+                [0.4, 0.6, 0.5],  # Gray
             ], dtype=np.float32) 
 
         self.indices = np.array([
