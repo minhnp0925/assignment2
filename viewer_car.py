@@ -67,7 +67,9 @@ class Viewer:
             
             GL.glViewport(0, 360, 960, 720)
             # draw objects in master window
+
             for drawable in self.drawables:
+                drawable.uma.upload_uniform_scalar1i(0, "depth_shader")
                 drawable.draw(projection=projection_matrix, view=view_matrix)
             
             # draw camera markers
@@ -76,9 +78,19 @@ class Viewer:
                 marker.draw(projection=projection_matrix, view=view_matrix)
 
             GL.glViewport(0, 0, 480, 360)
+            # display depth image
             projection_matrix = self.cameraArray.get_current_projection((480, 360))
             view_matrix = self.cameraArray.get_current_view()
             for drawable in self.drawables:
+                drawable.uma.upload_uniform_scalar1i(0, "depth_shader")
+                drawable.draw(projection=projection_matrix, view=view_matrix)
+
+            GL.glViewport(480, 0, 480, 360)
+            # display depth image
+            projection_matrix = self.cameraArray.get_current_projection((480, 360))
+            view_matrix = self.cameraArray.get_current_view()
+            for drawable in self.drawables:
+                drawable.uma.upload_uniform_scalar1i(1, "depth_shader")
                 drawable.draw(projection=projection_matrix, view=view_matrix)
             
             # flush render commands, and swap draw buffers

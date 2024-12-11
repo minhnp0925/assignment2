@@ -42,7 +42,7 @@ class StaticCamera:
     
     def get_projection_matrix(self, winsize = (640,640)):
         distance = vector.length(self.camera_pos)
-        return perspective(70, winsize[0]/winsize[1], distance*0.01, distance*100)
+        return perspective(45, winsize[0]/winsize[1], distance*0.01, distance*100)
     
     def get_drawable(self, is_active):
         drawable = Marker('./gouraud.vert', './gouraud.frag', self.camera_pos[0], self.camera_pos[1], self.camera_pos[2], is_active=is_active).setup()
@@ -50,7 +50,7 @@ class StaticCamera:
         return drawable
 
 class CameraArray:
-    def __init__(self, radius=10, num_latitude=3, num_longitude=3):
+    def __init__(self, radius=15, num_latitude=3, num_longitude=3):
         self.cameras = []
         self.active_index = 0
 
@@ -229,7 +229,7 @@ class Marker:
 
 class PovCamera:
     def __init__(self):
-        self.camera_pos = Vector3([0.0, 4.0, -10.0])
+        self.camera_pos = Vector3([0.0, 4.0, -15.0])
         self.camera_front = Vector3([0.0, 0.0, -1.0])
         self.camera_up = Vector3([0.0, 1.0, 0.0])
         self.camera_right = Vector3([1.0, 0.0, 0.0])
