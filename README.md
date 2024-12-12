@@ -1,8 +1,6 @@
-Car model: python viewer_car.py
-
-Pov camera working, multicam in progress
-
+- Car model: python viewer_car.py
+- Relevant files: model/*, libs/camera.py, libs/objLoader.py
 # TODO:
 - Fix bottleneck in marker rendering
-- Add depth buffer in right viewport
-- Save image to file?
+- Save image to file? (Done)
+- Background and more objects 
