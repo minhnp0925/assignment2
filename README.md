@@ -2,4 +2,5 @@
 - Relevant files: model/*, libs/camera.py, libs/objLoader.py
 # TODO:
 - Fix bottleneck in marker rendering
-- Save image to file?
+- Save image to file? (Done)
+- Background and more objects 
