@@ -50,7 +50,7 @@ class StaticCamera:
         return drawable
 
 class CameraArray:
-    def __init__(self, radius=15, num_latitude=5, num_longitude=5):
+    def __init__(self, radius=15, num_latitude=3, num_longitude=3):
         self.cameras = []
         self.active_index = 0
 
