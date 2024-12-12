@@ -80,7 +80,7 @@ class CameraArray:
 
 
     def add_camera(self, xpos, ypos, zpos):
-        print("Add cam: ", xpos, ypos, zpos)
+        # print("Add cam: ", xpos, ypos, zpos)
         self.cameras += [StaticCamera(xpos=xpos, ypos=ypos, zpos=zpos)]
     
     def get_current_view(self):
@@ -120,6 +120,11 @@ class CameraArray:
                 drawables += [self.cameras[i].get_drawable(False)]
 
         return drawables
+
+class MarkerBatch:
+    vert_shader = "./gouraud.vert"
+    frag_shader = "./gouraud.frag"
+    pass
 
 class Marker:
     def __init__(self, vert_shader, frag_shader, xpos, ypos, zpos, scale=0.1, is_active=False):

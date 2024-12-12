@@ -20,6 +20,9 @@ class Viewer:
         glfw.window_hint(glfw.RESIZABLE, False)
         glfw.window_hint(glfw.DEPTH_BITS, 16)
         glfw.window_hint(glfw.DOUBLEBUFFER, True)
+        GL.glEnable(GL.GL_BLEND)
+        GL.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA)
+
         self.win = glfw.create_window(width, height, 'Viewer', None, None)
 
         # make win's OpenGL context current; no OpenGL calls can happen before

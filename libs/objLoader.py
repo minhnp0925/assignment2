@@ -53,11 +53,17 @@ class ObjLoader:
 
 
     @staticmethod
-    def show_buffer_data(buffer):
-        for i in range(len(buffer)//8):
+    def show_buffer_data(buffer, limit=5):
+        # for i in range(len(buffer)//8):
+        #     start = i * 8
+        #     end = start + 8
+        #     print(buffer[start:end])
+
+        for i in range(limit):
             start = i * 8
             end = start + 8
             print(buffer[start:end])
+        
 
 
     @staticmethod

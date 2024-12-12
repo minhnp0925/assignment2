@@ -1,9 +1,7 @@
 from libs.shader import *
 import OpenGL.GL as GL
 import cv2
-
-
-
+from PIL import Image
 
 class VAO(object):
     def __init__(self):
@@ -13,8 +11,6 @@ class VAO(object):
         GL.glBindVertexArray(0)
         self.vbo = {}
         self.ebo = None
-
-
 
     def add_vbo(self, location, data,
                ncomponents=3, dtype=GL.GL_FLOAT, normalized=False, stride=0, offset=None):
@@ -78,7 +74,9 @@ class UManager(object):
     
     """
     def setup_texture(self, sampler_name, image_file):
-        rgb_image = UManager.load_texture(image_file)
+        image = Image.open(image_file)
+        image = image.transpose(Image.FLIP_TOP_BOTTOM)
+        image_data = image.convert("RGBA").tobytes()
 
         GL.glUseProgram(self.shader.render_idx) # must call before calling to GL.glUniform1i
         texture_idx = GL.glGenTextures(1)
@@ -92,9 +90,9 @@ class UManager(object):
         GL.glUniform1i(GL.glGetUniformLocation(self.shader.render_idx, sampler_name),
                        binding_loc)
 
-        GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGB,
-                        rgb_image.shape[1], rgb_image.shape[0],
-                        0, GL.GL_RGB, GL.GL_UNSIGNED_BYTE, rgb_image)
+        GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA,
+                        image.width, image.height,
+                        0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, image_data)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
 
