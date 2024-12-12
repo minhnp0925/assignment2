@@ -10,7 +10,7 @@ import glfw
 
 
 class CarModel(object):
-    def __init__(self, vert_shader = "./model/phong_texture.vert", frag_shader = "./model/phong_texture.frag"):
+    def __init__(self, obj_path  = "./model/car1.obj", texture_path = "./model/car1.png",vert_shader = "./model/phong_texture.vert", frag_shader = "./model/phong_texture.frag"):
         """
         self.vertex_attrib:
         each row: v.x, v.y, v.z, t.x, t.y, n.x, n.y, n.z
@@ -20,8 +20,8 @@ class CarModel(object):
                 offset(normal) = ctypes.c_void_p(5*4)
         """
         
-        self.obj_path = "./model/car1.obj"
-        self.texture_path = "./model/car1.png"
+        self.obj_path = obj_path
+        self.texture_path = texture_path
         
         self.indices, self.vertex_attrib = ObjLoader.load_model(self.obj_path, sorted=True)
         print("Debug: ") 
@@ -31,7 +31,7 @@ class CarModel(object):
 
         self.shader = Shader(vert_shader, frag_shader)
         self.uma = UManager(self.shader)
-
+        self.translation = 5
 
     def setup(self):
         stride = 8*4
@@ -72,7 +72,7 @@ class CarModel(object):
         return self
 
     def draw(self, 
-             projection = T.ortho(-1, 1, -1, 1, -1, 1), 
+             projection = T.ortho(-10, 10, -10, 10, -10, 10), 
              view = np.identity(4, 'f'), 
              model = np.identity(4, 'f')
             ):
@@ -81,9 +81,10 @@ class CarModel(object):
         GL.glUseProgram(self.shader.render_idx)
 
         # Rotate the model over time
-        # time = glfw.get_time()
+        time = glfw.get_time()
         rotation = pyrr.Matrix44.from_y_rotation(0)
         model = pyrr.matrix44.multiply(model, rotation)
+        model[1,3] = self.translation
 
         # Upload the rotation matrix to the shader
         modelview = pyrr.matrix44.multiply(view, model)
@@ -96,7 +97,7 @@ class CarModel(object):
         self.vao.deactivate()
 
 class ChibiModel(object):
-    def __init__(self, vert_shader = "./model/phong_texture.vert", frag_shader = "./model/phong_texture.frag"):
+    def __init__(self, obj_path  = "./model/car1.obj", texture_path = "./model/car1.png",vert_shader = "./model/phong_texture.vert", frag_shader = "./model/phong_texture.frag"):
         """
         self.vertex_attrib:
         each row: v.x, v.y, v.z, t.x, t.y, n.x, n.y, n.z
@@ -106,39 +107,29 @@ class ChibiModel(object):
                 offset(normal) = ctypes.c_void_p(5*4)
         """
         
-        self.obj_path = "./model/car1.obj"
-        self.texture_path = "./model/car1.png"
+        self.obj_path = obj_path
+        self.texture_path = texture_path
         
-        self.chibi_indices, self.chibi_buffer = ObjLoader.load_model(self.obj_path, sorted=True)
-
-        self.VAO = GL.glGenVertexArrays(1)
-        self.VBO = GL.glGenBuffers(1)
+        self.indices, self.vertex_attrib = ObjLoader.load_model(self.obj_path, sorted=True)
+        print("Debug: ") 
+        ObjLoader.show_buffer_data(self.vertex_attrib)
+        print(self.vertex_attrib)
+        self.vao = VAO()
 
         self.shader = Shader(vert_shader, frag_shader)
         self.uma = UManager(self.shader)
 
 
     def setup(self):
-        # Chibi VAO
-        GL.glBindVertexArray(VAO[0])
-        # Chibi Vertex Buffer Object
-        GL.glBindBuffer(GL.GL_ARRAY_BUFFER, self.VBO[0])
-        GL.glBufferData(GL.GL_ARRAY_BUFFER, self.chibi_buffer.nbytes, self.chibi_buffer, GL.GL_STATIC_DRAW)
+        stride = 8*4
+        offset_v = ctypes.c_void_p(0) 
+        offset_t = ctypes.c_void_p(3*4)
+        offset_n = ctypes.c_void_p(5*4)
+        self.vao.add_vbo(0, self.vertex_attrib, ncomponents=3, dtype=GL.GL_FLOAT, normalized=False, stride=stride, offset=offset_v)
+        self.vao.add_vbo(1, self.vertex_attrib, ncomponents=2, dtype=GL.GL_FLOAT, normalized=False, stride=stride, offset=offset_t)
+        self.vao.add_vbo(2, self.vertex_attrib, ncomponents=3, dtype=GL.GL_FLOAT, normalized=False, stride=stride, offset=offset_n)
 
-        # glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO)
-        # glBufferData(GL_ELEMENT_ARRAY_BUFFER, chibi_indices.nbytes, chibi_indices, GL_STATIC_DRAW)
-
-        # chibi vertices
-        GL.glEnableVertexAttribArray(0)
-        GL.glVertexAttribPointer(0, 3, GL.GL_FLOAT, GL.GL_FALSE, self.chibi_buffer.itemsize * 8, ctypes.c_void_p(0))
-        # chibi textures
-        GL.glEnableVertexAttribArray(1)
-        GL.glVertexAttribPointer(1, 2, GL.GL_FLOAT, GL.GL_FALSE, self.chibi_buffer.itemsize * 8, ctypes.c_void_p(12))
-        # chibi normals
-        GL.glVertexAttribPointer(2, 3, GL.GL_FLOAT, GL.GL_FALSE, self.chibi_buffer.itemsize * 8, ctypes.c_void_p(20))
-        GL.glEnableVertexAttribArray(2)
-
-        self.uma.setup_texture("car_texture", self.texture_path)
+        self.uma.setup_texture("chibi_texture", self.texture_path)
 
         # Light
         I_light = np.array([
@@ -168,7 +159,7 @@ class ChibiModel(object):
         return self
 
     def draw(self, 
-             projection = T.ortho(-1, 1, -1, 1, -1, 1), 
+             projection = T.ortho(-10, 10, -10, 10, -10, 10), 
              view = np.identity(4, 'f'), 
              model = np.identity(4, 'f')
             ):
@@ -176,9 +167,7 @@ class ChibiModel(object):
         self.vao.activate()
         GL.glUseProgram(self.shader.render_idx)
 
-        # Rotate the model over time
-        time = glfw.get_time()
-        rotation = pyrr.Matrix44.from_y_rotation(time * 0.5)
+        rotation = pyrr.Matrix44.from_y_rotation(0)
         model = pyrr.matrix44.multiply(model, rotation)
 
         # Upload the rotation matrix to the shader
@@ -186,9 +175,7 @@ class ChibiModel(object):
         self.uma.upload_uniform_matrix4fv(projection, 'projection', True)
         self.uma.upload_uniform_matrix4fv(modelview, 'modelview', True)
         
-        # Draw da cube
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, len(self.indices))
 
         # Deactivate VAO
         self.vao.deactivate()
-

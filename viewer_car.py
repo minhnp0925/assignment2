@@ -4,7 +4,7 @@ import numpy as np                  # all matrix manipulations & OpenGL args
 from patch import *
 from itertools import cycle   # cyclic iterator to easily toggle polygon rendering modes
 from patch.textured.TexturedPatch import *
-from model.model import CarModel
+from model.model import *
 from libs.transform import Trackball
 from libs.camera import *
 from OpenGL.GL import *
@@ -149,7 +149,7 @@ class Viewer:
         self.lastX = xpos
         self.lastY = ypos
 
-        self.povCamera.process_mouse_movement(xoffset, yoffset)
+        # self.povCamera.process_mouse_movement(xoffset, yoffset)
 
 
 # -------------- main program and scene setup --------------------------------
@@ -163,8 +163,11 @@ def main():
     #model = PatchEx("./phongex.vert", "./phongex.frag").setup()
 
     # model = TexturedPatch("./textured/phong_texture.vert", "./textured/phong_texture.frag", vertices, indices).setup()
-    model = CarModel().setup()
-    viewer.add(model)
+    model1 = ChibiModel().setup()
+    viewer.add(model1)
+
+    model2 = CarModel(obj_path  = "./model/chibi.obj", texture_path = "./model/chibi.png").setup()
+    viewer.add(model2)
 
     # start rendering loop
     viewer.run()
