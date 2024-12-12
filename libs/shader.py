@@ -25,7 +25,7 @@ class Shader:
                 sys.exit(1)
 
     def __del__(self):
-        GL.glUseProgram(0)
+        # GL.glUseProgram(0)
         if self.render_idx:                      # if this is a valid shader object
             GL.glDeleteProgram(self.render_idx)  # object dies => destroy GL object
 

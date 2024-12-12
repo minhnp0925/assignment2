@@ -69,6 +69,7 @@ class Viewer:
 
         # shaders
         initialize_model_shader()
+        initialize_marker_shader()
 
     def run(self):
         """ Main render loop for this OpenGL windows """

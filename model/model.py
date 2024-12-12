@@ -69,9 +69,6 @@ class Model(object):
         self.shader = model_shader
         self.uma = model_uma
 
-        self.translation = 0
-
-
     def setup(self):
         stride = 8*4
         offset_v = ctypes.c_void_p(0) 
@@ -97,7 +94,6 @@ class Model(object):
         time = glfw.get_time()
         rotation = pyrr.Matrix44.from_y_rotation(time*0)
         model = pyrr.matrix44.multiply(model, rotation)
-        model[1,3] = self.translation
 
         # Upload the rotation matrix to the shader
         modelview = pyrr.matrix44.multiply(view, model)
