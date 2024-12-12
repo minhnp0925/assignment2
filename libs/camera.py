@@ -50,7 +50,7 @@ class StaticCamera:
         return drawable
 
 class CameraArray:
-    def __init__(self, radius=15, num_latitude=3, num_longitude=3):
+    def __init__(self, radius=15, num_latitude=5, num_longitude=5):
         self.cameras = []
         self.active_index = 0
 
@@ -89,6 +89,12 @@ class CameraArray:
             return np.identity(4,'f')
         
         return self.cameras[self.active_index].get_view_matrix()
+    def get_current_pos(self):
+        if (self.active_index == -1 or self.active_index >= len(self.cameras)):
+            print("[ERROR] CameraArray get_current_view: Invalid index!")
+            return np.identity(4,'f')
+        
+        return self.cameras[self.active_index].camera_pos
     
     def get_current_projection(self, winsize=(640, 640)):
         if (self.active_index == -1 or self.active_index >= len(self.cameras)):
@@ -229,7 +235,7 @@ class Marker:
 
 class PovCamera:
     def __init__(self):
-        self.camera_pos = Vector3([0.0, 4.0, -15.0])
+        self.camera_pos = Vector3([0.0, 0.0, 50.0])
         self.camera_front = Vector3([0.0, 0.0, -1.0])
         self.camera_up = Vector3([0.0, 1.0, 0.0])
         self.camera_right = Vector3([1.0, 0.0, 0.0])

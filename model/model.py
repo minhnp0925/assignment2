@@ -80,8 +80,8 @@ class CarModel(object):
         GL.glUseProgram(self.shader.render_idx)
 
         # Rotate the model over time
-        time = glfw.get_time()
-        rotation = pyrr.Matrix44.from_y_rotation(time * 0.5)
+        # time = glfw.get_time()
+        rotation = pyrr.Matrix44.from_y_rotation(0)
         model = pyrr.matrix44.multiply(model, rotation)
 
         # Upload the rotation matrix to the shader
@@ -89,7 +89,6 @@ class CarModel(object):
         self.uma.upload_uniform_matrix4fv(projection, 'projection', True)
         self.uma.upload_uniform_matrix4fv(modelview, 'modelview', True)
         
-        # Draw da cube
         GL.glDrawArrays(GL.GL_TRIANGLES, 0, len(self.indices))
 
         # Deactivate VAO

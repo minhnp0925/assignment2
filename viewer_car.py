@@ -7,6 +7,20 @@ from patch.textured.TexturedPatch import *
 from model.model import CarModel
 from libs.transform import Trackball
 from libs.camera import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+
+from PIL import Image
+from PIL import ImageOps
+
+
+def save_image(start_points = [0,0], width_heigth = [480, 360], save_name = 'rgb', path_folder = 'save_images'):
+    data = glReadPixels(start_points[0], start_points[1], width_heigth[0], width_heigth[1], GL_RGBA, GL_UNSIGNED_BYTE)
+    image = Image.frombytes("RGBA", (width_heigth[0], width_heigth[1]), data)
+    image = ImageOps.flip(image) # in my case image is flipped top-bottom for some reason
+    save_path = os.path.join(path_folder, f'{save_name}.png')
+    image.save(save_path, 'PNG')
 
 # ------------  Viewer class & windows management ------------------------------
 class Viewer:
@@ -78,13 +92,13 @@ class Viewer:
                 marker.draw(projection=projection_matrix, view=view_matrix)
 
             GL.glViewport(0, 0, 480, 360)
-            # display depth image
+            # display rgb image
             projection_matrix = self.cameraArray.get_current_projection((480, 360))
             view_matrix = self.cameraArray.get_current_view()
             for drawable in self.drawables:
-                drawable.uma.upload_uniform_scalar1i(0, "depth_shader")
                 drawable.draw(projection=projection_matrix, view=view_matrix)
-
+            x_cam,y_cam,z_cam = np.round(self.cameraArray.get_current_pos(),1)
+            save_image(start_points=[0,0], width_heigth=[480,360], save_name=f'rgb_({x_cam},{y_cam},{z_cam})')
             GL.glViewport(480, 0, 480, 360)
             # display depth image
             projection_matrix = self.cameraArray.get_current_projection((480, 360))
@@ -93,6 +107,7 @@ class Viewer:
                 drawable.uma.upload_uniform_scalar1i(1, "depth_shader")
                 drawable.draw(projection=projection_matrix, view=view_matrix)
             
+            save_image(start_points=[480,0], width_heigth=[480,360], save_name=f'depth_({x_cam},{y_cam},{z_cam})')
             # flush render commands, and swap draw buffers
             glfw.swap_buffers(self.win)
 
