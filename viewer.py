@@ -5,6 +5,7 @@ from patch import *
 from itertools import cycle   # cyclic iterator to easily toggle polygon rendering modes
 from patch.textured.TexturedPatch import *
 from libs.transform import Trackball
+from model.model import initialize_model_shader
 
 # ------------  Viewer class & windows management ------------------------------
 class Viewer:
@@ -28,9 +29,8 @@ class Viewer:
         # make win's OpenGL context current; no OpenGL calls can happen before
         glfw.make_context_current(self.win)
 
-        # initialize trackball
-        self.trackball = Trackball()
-        self.mouse = (0, 0)
+        # initialize shader
+        initialize_model_shader()
 
         # register event handlers
         glfw.set_key_callback(self.win, self.on_key)

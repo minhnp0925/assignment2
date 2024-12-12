@@ -81,20 +81,30 @@ class UManager(object):
         GL.glUseProgram(self.shader.render_idx) # must call before calling to GL.glUniform1i
         texture_idx = GL.glGenTextures(1)
         binding_loc = self._get_texture_loc()
-        self.textures[binding_loc] = {}
-        self.textures[binding_loc]["id"] = texture_idx
-        self.textures[binding_loc]["name"] = sampler_name
+        self.textures[binding_loc] = {
+            "id": texture_idx,
+            "name": sampler_name
+        }
 
         GL.glActiveTexture(GL.GL_TEXTURE0 + binding_loc) # activate texture GL.GL_TEXTURE0, GL.GL_TEXTURE1, ...
         GL.glBindTexture(GL.GL_TEXTURE_2D, texture_idx)
-        GL.glUniform1i(GL.glGetUniformLocation(self.shader.render_idx, sampler_name),
-                       binding_loc)
+        # GL.glUniform1i(GL.glGetUniformLocation(self.shader.render_idx, sampler_name),
+        #               binding_loc)
+        GL.glUniform1i(GL.glGetUniformLocation(self.shader.render_idx, "s_texture"), binding_loc)
 
         GL.glTexImage2D(GL.GL_TEXTURE_2D, 0, GL.GL_RGBA,
                         image.width, image.height,
                         0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, image_data)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR)
         GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR)
+
+    def bind_texture(self, sampler_name):
+        # Find the texture by its name
+        for loc, texture in self.textures.items():
+            if texture["name"] == sampler_name:
+                GL.glUniform1i(GL.glGetUniformLocation(self.shader.render_idx, "s_texture"), loc)
+                # print("Bind texture: ", loc, texture["id"])
+                break
 
     def upload_uniform_matrix4fv(self, matrix, name, transpose=True):
         GL.glUseProgram(self.shader.render_idx)

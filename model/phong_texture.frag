@@ -13,7 +13,7 @@ uniform float shininess; // Shininess
 uniform vec3 light_pos; // Light position
 out vec4 fragColor;
 
-uniform sampler2D car_texture;
+uniform sampler2D s_texture;
 uniform bool depth_shader; // false = rgb, true = depth image
 
 float near = 0.01;
@@ -44,7 +44,7 @@ void main() {
     float texture_factor = 1.0 - phong_factor;
 
     vec4 texture_color;
-    texture_color = texture(car_texture, texcoord_interp);  
+    texture_color = texture(s_texture, texcoord_interp);  
     fragColor = phong_factor*fragColor + texture_factor*texture_color; 
   }
 }

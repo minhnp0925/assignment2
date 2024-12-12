@@ -14,7 +14,6 @@ from OpenGL.GLUT import *
 from PIL import Image
 from PIL import ImageOps
 
-
 def save_image(start_points = [0,0], width_heigth = [480, 360], save_name = 'rgb', path_folder = 'save_images'):
     data = glReadPixels(start_points[0], start_points[1], width_heigth[0], width_heigth[1], GL_RGBA, GL_UNSIGNED_BYTE)
     image = Image.frombytes("RGBA", (width_heigth[0], width_heigth[1]), data)
@@ -67,6 +66,9 @@ class Viewer:
         # cameras
         self.povCamera = PovCamera()
         self.cameraArray = CameraArray()
+
+        # shaders
+        initialize_model_shader()
 
     def run(self):
         """ Main render loop for this OpenGL windows """
@@ -163,11 +165,11 @@ def main():
     #model = PatchEx("./phongex.vert", "./phongex.frag").setup()
 
     # model = TexturedPatch("./textured/phong_texture.vert", "./textured/phong_texture.frag", vertices, indices).setup()
-    model1 = ChibiModel().setup()
-    viewer.add(model1)
+    car_model = Model(obj_path="./model/car1.obj", texture_path="./model/car1.png", model_name="car").setup()
+    viewer.add(car_model)
 
-    model2 = CarModel(obj_path  = "./model/chibi.obj", texture_path = "./model/chibi.png").setup()
-    viewer.add(model2)
+    chibi_model = Model(obj_path  = "./model/chibi.obj", texture_path = "./model/chibi.png", model_name="chibi").setup()
+    viewer.add(chibi_model)
 
     # start rendering loop
     viewer.run()
