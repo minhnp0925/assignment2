@@ -51,14 +51,15 @@ class StaticCamera:
         return drawable
 
 class CameraArray:
-    def __init__(self, radius=25, num_latitude=7, num_longitude=7):
+    def __init__(self, radius=45, num_latitude=5, num_longitude=5):
         self.cameras = []
         self.active_index = 0
 
         self.radius = radius
         self.num_latitude = num_latitude
         self.num_longitude = num_longitude
-
+        self.m = False
+        self.time = 0
         # Generate camera positions
         self.generate_camera_positions()
 
@@ -114,12 +115,17 @@ class CameraArray:
             self.set_active(next_idx)
         if key == glfw.KEY_LEFT:
             self.set_active(prev_idx)
+        if key == glfw.KEY_M:
+            self.m = not(self.m)
         
     def get_drawable(self):
         return self.cameras[self.active_index].get_drawable(True) if self.active_index > -1 else None
     
     def get_all_drawables(self):
         drawables = []
+        self.time  += 1
+        if (self.m == True and self.time %3 == 0): 
+            self.active_index = (self.active_index + 1) % len(self.cameras)
         for i in range(0, len(self.cameras)):
             if i == self.active_index:
                 drawables += [self.cameras[i].get_drawable(True)]
@@ -127,6 +133,7 @@ class CameraArray:
                 drawables += [self.cameras[i].get_drawable(False)]
 
         return drawables
+    
 
 marker_shader = None
 marker_uma = None

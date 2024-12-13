@@ -47,7 +47,7 @@ def initialize_model_shader():
 
 
 class Model(object):
-    def __init__(self, obj_path, texture_path, model_name):
+    def __init__(self, obj_path, texture_path, model_name, translation = [0,0,0], tranformatrix = None):
         """
         self.vertex_attrib:
         each row: v.x, v.y, v.z, t.x, t.y, n.x, n.y, n.z
@@ -60,10 +60,10 @@ class Model(object):
         self.obj_path = obj_path
         self.texture_path = texture_path
         self.model_name = model_name
-
+        self.translation = translation
+        self.is_translate = False
+        self.tranformatrix = tranformatrix
         self.indices, self.vertex_attrib = ObjLoader.load_model(self.obj_path, sorted=True)
-        print("Debug: ") 
-        ObjLoader.show_buffer_data(self.vertex_attrib)
 
         self.vao = VAO()
         self.shader = model_shader
@@ -94,7 +94,17 @@ class Model(object):
         time = glfw.get_time()
         rotation = pyrr.Matrix44.from_y_rotation(time*0)
         model = pyrr.matrix44.multiply(model, rotation)
-
+        if self.tranformatrix is not None:
+            model = self.tranformatrix.T
+            if self.is_translate == False:
+                model[0,3] += self.translation[0]
+                model[1,3] += self.translation[1]
+                model[2,3] += self.translation[2]
+                self.is_translate = True
+        else:
+            model[0,3] = self.translation[0]
+            model[1,3] = self.translation[1]
+            model[2,3] = self.translation[2]
         # Upload the rotation matrix to the shader
         modelview = pyrr.matrix44.multiply(view, model)
         self.uma.upload_uniform_matrix4fv(projection, 'projection', True)
